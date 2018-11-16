@@ -10,11 +10,17 @@ import com.csw.system.entity.Authority;
 import com.csw.system.param.AuthorityParam;
 import com.csw.system.repository.AuthorityRepository;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.Predicate;
 import java.util.List;
 
 /**
@@ -63,6 +69,13 @@ public class AuthorityService extends BaseComponent {
         return new PageResult<>(authorityList);
     }
 
+    public PageResult<Authority> queryByPage(Integer page, Integer limit, String keyword) {
+        Sort sort = new Sort(Sort.Direction.ASC, "orderNumber");
+        Pageable pageable = PageRequest.of(page, limit, sort);
+        Page<Authority> authorityPage = authorityRepository.findAll(pageable);
+        return new PageResult<>(authorityPage.getTotalElements(), authorityPage.getContent());
+    }
+
     public List<Authority> findMenuAuth() {
         return authorityRepository.findAllByMenuType(MenuTypeCode.MENU.getCode());
     }
@@ -90,4 +103,5 @@ public class AuthorityService extends BaseComponent {
         authority.setParentId(param.getParentId());
         authorityRepository.save(authority);
     }
+
 }
