@@ -1,15 +1,30 @@
 package com.csw.common.oauth;
 
 import com.csw.system.service.UserDetailsServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Spring Security配置
@@ -17,7 +32,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  */
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private MyFilterSecurityInterceptor myFilterSecurityInterceptor;
 
     @Bean
     @Override
@@ -42,10 +60,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
         //对oauth开头的请求不拦截
         http.authorizeRequests().antMatchers("/oauth/*").permitAll();
-    }
 
+        http.addFilterBefore(myFilterSecurityInterceptor, FilterSecurityInterceptor.class);
+
+    }
 }

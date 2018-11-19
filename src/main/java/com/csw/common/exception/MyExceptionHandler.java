@@ -26,10 +26,7 @@ public class MyExceptionHandler {
         if (ex instanceof IException) {
             map.put("code", ((IException) ex).getCode());
             map.put("msg", ex.getMessage());
-        }/* else if (ex instanceof UnauthorizedException) {
-            map.put("code", 403);
-            map.put("msg", "没有访问权限");
-        }*/ else {
+        } else {
             String message = ex.getMessage();
             map.put("code", 500);
             map.put("msg", message == null || message.trim().isEmpty() ? "未知错误" : message);
