@@ -67,7 +67,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         //对oauth开头的请求不拦截
         http.authorizeRequests().antMatchers("/oauth/*").permitAll();
 
-        http.addFilterBefore(myFilterSecurityInterceptor, FilterSecurityInterceptor.class);
+//        http.addFilterBefore(myFilterSecurityInterceptor, FilterSecurityInterceptor.class);
 
     }
 }

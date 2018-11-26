@@ -4,6 +4,7 @@ import com.csw.common.base.BaseComponent;
 import com.csw.common.base.PageResult;
 import com.csw.common.constant.StatusCode;
 import com.csw.common.exception.BusinessException;
+import com.csw.common.exception.ParameterException;
 import com.csw.common.utils.BeanCopyUtil;
 import com.csw.common.utils.BeanValidator;
 import com.csw.common.utils.StringUtil;
@@ -57,39 +58,41 @@ public class UserService extends BaseComponent {
         user.setState(param.getState() != null ? param.getState() : StatusCode.NORMAL.getCode());
         user.setOperator(getLoginUsername());
         user = userRepository.save(user);
-        if (StringUtil.isNotBlank(param.getRoleId())) {
-            updateUserRole(user, param.getRoleId());
-        }
+        updateUserRole(user, param.getRoleId());
     }
 
     @Transactional
     public void update(UserParam param) {
-        Preconditions.checkNotNull(param.getId(), "修改记录Id不可以为null");
-        User user = userRepository.findById(param.getId()).get();
-        Preconditions.checkNotNull(user, "待更新用户(id:" + param.getId() + ")不存在");
+        User user = getUserByUserId(param.getId());
         user.setUsername(param.getUsername());
         user.setNickName(param.getNickName());
         user.setSex(param.getSex());
         user.setPhone(param.getPhone());
         user.setOperator(getLoginUsername());
         userRepository.save(user);
-        if (StringUtil.isNotBlank(param.getRoleId())) {
-            userRoleRepository.deleteByUser(user);
-            updateUserRole(user, param.getRoleId());
-        }
+        updateUserRole(user, param.getRoleId());
     }
 
     @Transactional
-    public void updateUserRole(User user, String roleIds) {
-        String[] roleIdList = StringUtils.split(roleIds, ",");
-        List<UserRole> userRoleList = Lists.newArrayList();
-        for (String roleId : roleIdList) {
-            Role role = roleRepository.findById(Integer.valueOf(roleId)).get();
-            Preconditions.checkNotNull(role, "角色(id:" + roleId + ")不存在");
-            UserRole userRole = UserRole.builder().user(user).role(role).operator(getLoginUsername()).build();
-            userRoleList.add(userRole);
+    public void assignRole(Integer userId, String roleId) {
+        updateUserRole(getUserByUserId(userId), roleId);
+    }
+
+    private void updateUserRole(User user, String roleIds) {
+        if (StringUtil.isNotBlank(roleIds)) {
+            String[] roleIdList = StringUtils.split(roleIds, ",");
+            List<UserRole> userRoleList = Lists.newArrayList();
+            for (String roleId : roleIdList) {
+                Role role = roleRepository.findById(Integer.valueOf(roleId)).get();
+                Preconditions.checkNotNull(role, "角色(id:" + roleId + ")不存在");
+                UserRole userRole = UserRole.builder().user(user).role(role).operator(getLoginUsername()).build();
+                userRoleList.add(userRole);
+            }
+            userRoleRepository.deleteByUser(user);
+            userRoleRepository.saveAll(userRoleList);
+        } else {
+            throw new ParameterException("给用户分配角色时，角色Id不可以为空");
         }
-        userRoleRepository.saveAll(userRoleList);
     }
 
     public void updateState(Integer userId, Integer state) {
@@ -123,5 +126,12 @@ public class UserService extends BaseComponent {
             }
         }
         return new PageResult<>(userPage.getTotalElements(), userList);
+    }
+
+    private User getUserByUserId(Integer userId) {
+        Preconditions.checkNotNull(userId, "更新用户信息，userId不可以为null");
+        User user = userRepository.findById(userId).get();
+        Preconditions.checkNotNull(user, "待更新用户(userId:" + user + ")不存在");
+        return user;
     }
 }

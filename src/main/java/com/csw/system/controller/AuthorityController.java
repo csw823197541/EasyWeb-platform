@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.csw.common.base.JsonResult;
 import com.csw.common.base.PageResult;
+import com.csw.common.constant.StatusCode;
 import com.csw.system.entity.Authority;
 import com.csw.system.param.AuthSyncParam;
 import com.csw.system.param.AuthorityParam;
@@ -41,6 +42,14 @@ public class AuthorityController {
     public JsonResult update(@RequestBody AuthorityParam param) {
         authorityService.update(param);
         return JsonResult.ok();
+    }
+
+    @ApiOperation(value = "删除权限")
+    @ApiImplicitParam(name = "id", value = "权限id", required = true, dataType = "Integer", paramType = "path")
+    @DeleteMapping("/{id}")
+    public JsonResult delete(@PathVariable("id") Integer id) {
+        authorityService.delete(id, StatusCode.DELETE.getCode());
+        return JsonResult.ok("删除成功");
     }
 
     @ApiOperation(value = "同步权限")
@@ -100,7 +109,7 @@ public class AuthorityController {
         return authorityService.queryByPage(page, limit, keyword);
     }
 
-    @ApiOperation(value = "查询所有菜单权限")
+    @ApiOperation(value = "查询所有菜单权限(上级权限)")
     @GetMapping("/menuAuth")
     public JsonResult menuAuth() {
         return JsonResult.ok().put("data", authorityService.findMenuAuth());

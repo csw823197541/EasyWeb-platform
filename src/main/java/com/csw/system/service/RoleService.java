@@ -3,15 +3,18 @@ package com.csw.system.service;
 import com.csw.common.base.BaseComponent;
 import com.csw.common.base.PageResult;
 import com.csw.common.constant.RoleTypeCode;
+import com.csw.common.exception.BusinessException;
 import com.csw.common.utils.BeanValidator;
 import com.csw.common.utils.StringUtil;
 import com.csw.system.entity.Authority;
 import com.csw.system.entity.Role;
 import com.csw.system.entity.RoleAuthority;
+import com.csw.system.entity.UserRole;
 import com.csw.system.param.RoleParam;
 import com.csw.system.repository.AuthorityRepository;
 import com.csw.system.repository.RoleAuthorityRepository;
 import com.csw.system.repository.RoleRepository;
+import com.csw.system.repository.UserRoleRepository;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,9 @@ public class RoleService extends BaseComponent {
 
     @Autowired
     private AuthorityRepository authorityRepository;
+
+    @Autowired
+    private UserRoleRepository userRoleRepository;
 
     public List<Role> findAll(int code) {
         return (List<Role>) roleRepository.findAll();
@@ -78,7 +84,21 @@ public class RoleService extends BaseComponent {
         roleRepository.save(role);
     }
 
-    public void updateState(Integer id, int code) {
+    @Transactional
+    public void delete(Integer id, int code) {
+        Role role = roleRepository.findById(id).get();
+        Preconditions.checkNotNull(role, "角色(id:" + id + ")不存在");
+        List<UserRole> userRoleList = userRoleRepository.findAllByRole(role);
+        if (userRoleList.size() > 0) {
+            StringBuilder str = new StringBuilder();
+            for (UserRole userRole : userRoleList) {
+                str.append(userRole.getUser().getUsername()).append("、");
+            }
+            str.deleteCharAt(str.length() - 1);
+            throw new BusinessException("该角色(id:" + id + ")已被用户(" + str.toString() + ")绑定，不能删除，请先解绑");
+        }
+        roleAuthorityRepository.deleteByRole(role);
+        roleRepository.delete(role);
 
     }
 

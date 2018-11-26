@@ -1,5 +1,6 @@
 package com.csw.system.repository;
 
+import com.csw.system.entity.Role;
 import com.csw.system.entity.User;
 import com.csw.system.entity.UserRole;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -15,4 +16,8 @@ public interface UserRoleRepository extends PagingAndSortingRepository<UserRole,
     List<UserRole> findAllByUser(User user);
 
     void deleteByUser(User user);
+
+    int countByRole(Role role);
+
+    List<UserRole> findAllByRole(Role role);
 }

@@ -1,5 +1,6 @@
 package com.csw.system.repository;
 
+import com.csw.system.entity.Authority;
 import com.csw.system.entity.Role;
 import com.csw.system.entity.RoleAuthority;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -15,4 +16,8 @@ public interface RoleAuthorityRepository extends PagingAndSortingRepository<Role
     List<RoleAuthority> findAllByRole(Role role);
 
     void deleteByRole(Role role);
+
+    List<RoleAuthority> findAllByAuthority(Authority authority);
+
+    void deleteByAuthority(Authority authority);
 }

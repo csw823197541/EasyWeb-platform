@@ -21,12 +21,14 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,6 +53,9 @@ public class OAuth2ServerConfig {
         @Autowired
         private MyAccessDeniedHandler myAccessDeniedHandler;
 
+        @Autowired
+        private MyFilterSecurityInterceptor myFilterSecurityInterceptor;
+
         @Override
         public void configure(ResourceServerSecurityConfigurer resources) {
             resources.resourceId(RESOURCE_ID).stateless(true);
@@ -63,8 +68,9 @@ public class OAuth2ServerConfig {
             http.cors();
             http.authorizeRequests().antMatchers(HttpMethod.OPTIONS, "/**").permitAll();
             // 配置必须认证过后才可以访问的接口
-            http.authorizeRequests()
-                    .antMatchers("/sys/**").authenticated();
+            http.authorizeRequests().antMatchers("/sys/**").authenticated();
+
+            http.addFilterBefore(myFilterSecurityInterceptor, FilterSecurityInterceptor.class);
         }
     }
 
@@ -147,6 +153,7 @@ public class OAuth2ServerConfig {
         Map<String, Object> map = new HashMap<>();
         map.put("code", "403");
         map.put("msg", e.getMessage());
+        map.put("data", new ArrayList<>());
         return objectMapper.writeValueAsString(map);
     }
 

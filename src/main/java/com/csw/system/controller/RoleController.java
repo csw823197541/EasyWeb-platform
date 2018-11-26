@@ -62,11 +62,11 @@ public class RoleController {
     @ApiImplicitParam(name = "id", value = "角色id", required = true, dataType = "Integer", paramType = "path")
     @DeleteMapping("/{id}")
     public JsonResult delete(@PathVariable("id") Integer id) {
-        roleService.updateState(id, StatusCode.DELETE.getCode());
+        roleService.delete(id, StatusCode.DELETE.getCode());
         return JsonResult.ok("删除成功");
     }
 
-    @ApiOperation(value = "角色权限(树)")
+    @ApiOperation(value = "角色拥有的权限(树)")
     @ApiImplicitParam(name = "param", value = "角色id", required = true, dataType = "RoleParam")
     @PostMapping("/authTree")
     public List<Map<String, Object>> findAuthTree(@RequestBody RoleParam param) {

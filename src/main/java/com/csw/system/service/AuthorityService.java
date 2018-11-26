@@ -3,12 +3,15 @@ package com.csw.system.service;
 import com.csw.common.base.BaseComponent;
 import com.csw.common.base.PageResult;
 import com.csw.common.constant.MenuTypeCode;
+import com.csw.common.exception.BusinessException;
 import com.csw.common.utils.BeanCopyUtil;
 import com.csw.common.utils.BeanValidator;
 import com.csw.common.utils.StringUtil;
 import com.csw.system.entity.Authority;
+import com.csw.system.entity.RoleAuthority;
 import com.csw.system.param.AuthorityParam;
 import com.csw.system.repository.AuthorityRepository;
+import com.csw.system.repository.RoleAuthorityRepository;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,9 @@ public class AuthorityService extends BaseComponent {
 
     @Autowired
     private AuthorityRepository authorityRepository;
+
+    @Autowired
+    private RoleAuthorityRepository roleAuthorityRepository;
 
     @Transactional
     public void sync(List<Authority> authorityList) {
@@ -63,6 +69,22 @@ public class AuthorityService extends BaseComponent {
         }
     }
 
+    @Transactional
+    public void delete(Integer id, int code) {
+        Authority authority = getAuthorityById(id);
+        List<RoleAuthority> roleAuthorityList = roleAuthorityRepository.findAllByAuthority(authority);
+        if (roleAuthorityList.size() > 0) {
+            StringBuilder str = new StringBuilder();
+            for (RoleAuthority roleAuthority : roleAuthorityList) {
+                str.append(roleAuthority.getRole().getRoleName()).append("、");
+            }
+            str.deleteCharAt(str.length() - 1);
+            throw new BusinessException("该权限(id:" + id + ")已被角色(" + str.toString() + ")绑定，不能删除，请先解绑");
+        }
+        roleAuthorityRepository.deleteByAuthority(authority);
+        authorityRepository.delete(authority);
+    }
+
     public PageResult<Authority> query(String keyword) {
         Sort sort = new Sort(Sort.Direction.ASC, "orderNumber");
         List<Authority> authorityList = (List<Authority>) authorityRepository.findAll(sort);
@@ -80,6 +102,7 @@ public class AuthorityService extends BaseComponent {
         return authorityRepository.findAllByMenuType(MenuTypeCode.MENU.getCode());
     }
 
+    @Transactional
     public void create(AuthorityParam param) {
         BeanValidator.check(param);
         Authority authority = Authority.builder().build();
@@ -89,11 +112,10 @@ public class AuthorityService extends BaseComponent {
         authorityRepository.save(authority);
     }
 
+    @Transactional
     public void update(AuthorityParam param) {
         BeanValidator.check(param);
-        Preconditions.checkNotNull(param.getId(), "修改记录Id不可以为null");
-        Authority authority = authorityRepository.findById(param.getId()).get();
-        Preconditions.checkNotNull(authority, "权限(id:" + param.getId() + ")不存在");
+        Authority authority = getAuthorityById(param.getId());
         authority.setAuthorityName(param.getAuthorityName());
         authority.setAuthorityUrl(StringUtil.isNotBlank(param.getAuthorityUrl()) ? param.getAuthorityUrl() : null);
         authority.setMenuUrl(param.getMenuUrl());
@@ -102,6 +124,13 @@ public class AuthorityService extends BaseComponent {
         authority.setOrderNumber(param.getOrderNumber());
         authority.setParentId(param.getParentId());
         authorityRepository.save(authority);
+    }
+
+    private Authority getAuthorityById(Integer id) {
+        Preconditions.checkNotNull(id, "更新权限信息，Id不可以为null");
+        Authority authority = authorityRepository.findById(id).get();
+        Preconditions.checkNotNull(authority, "待更新权限(id:" + id + ")不存在");
+        return authority;
     }
 
 }

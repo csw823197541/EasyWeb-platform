@@ -92,11 +92,14 @@ public class UserController extends BaseComponent {
         return JsonResult.ok("修改成功");
     }
 
-    @ApiOperation(value = "重置密码", notes = "")
-    @ApiImplicitParam(name = "id", value = "用户id", required = true, dataType = "Integer", paramType = "path")
-    @PutMapping("/psw/{id}")
-    public JsonResult resetPsw(@PathVariable("id") Integer id) {
-        userService.updatePsw(id, "123456");
-        return JsonResult.ok("重置成功");
+    @ApiOperation(value = "分配角色", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "Integer"),
+            @ApiImplicitParam(name = "roleId", value = "角色id(逗号隔开)", required = true, dataType = "String")
+    })
+    @PutMapping("/assignRole")
+    public JsonResult resetPsw(Integer userId, String roleId) {
+        userService.assignRole(userId, roleId);
+        return JsonResult.ok("分配角色成功");
     }
 }
