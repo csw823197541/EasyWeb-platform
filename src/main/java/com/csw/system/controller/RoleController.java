@@ -69,8 +69,8 @@ public class RoleController {
     @ApiOperation(value = "角色拥有的权限(树)")
     @ApiImplicitParam(name = "param", value = "角色id", required = true, dataType = "RoleParam")
     @PostMapping("/authTree")
-    public List<Map<String, Object>> findAuthTree(@RequestBody RoleParam param) {
-        return roleService.findAuthTree(param);
+    public JsonResult findAuthTree(@RequestBody RoleParam param) {
+        return JsonResult.ok().put("data", roleService.findAuthTree(param));
     }
 
     @ApiOperation(value = "绑定权限")

@@ -90,8 +90,6 @@ public class UserService extends BaseComponent {
             }
             userRoleRepository.deleteByUser(user);
             userRoleRepository.saveAll(userRoleList);
-        } else {
-            throw new ParameterException("给用户分配角色时，角色Id不可以为空");
         }
     }
 
