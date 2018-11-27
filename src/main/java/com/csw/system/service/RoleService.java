@@ -55,7 +55,7 @@ public class RoleService extends BaseComponent {
         if (StringUtil.isNotBlank(keyword)) {
             Specification<Role> specification = (root, criteriaQuery, criteriaBuilder) -> {
                 List<Predicate> predicateList = Lists.newArrayList();
-                predicateList.add(criteriaBuilder.like(root.get("roleName"), keyword + "%"));
+                predicateList.add(criteriaBuilder.like(root.get("roleName"), "%" + keyword + "%"));
                 return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
             };
             roleList = roleRepository.findAll(specification, sort);

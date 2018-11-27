@@ -32,7 +32,7 @@ public class RoleController {
         return JsonResult.ok().put("data", roleList);
     }
 
-    @ApiOperation(value = "查询所有角色（表格）")
+    @ApiOperation(value = "查询所有角色（分页）")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "keyword", value = "筛选条件关键字", dataType = "String"),
             @ApiImplicitParam(name = "access_token", value = "令牌", required = true, dataType = "String")
@@ -59,9 +59,9 @@ public class RoleController {
     }
 
     @ApiOperation(value = "删除角色")
-    @ApiImplicitParam(name = "id", value = "角色id", required = true, dataType = "Integer", paramType = "path")
-    @DeleteMapping("/{id}")
-    public JsonResult delete(@PathVariable("id") Integer id) {
+    @ApiImplicitParam(name = "id", value = "角色id", required = true, dataType = "Integer")
+    @DeleteMapping()
+    public JsonResult delete(Integer id) {
         roleService.delete(id, StatusCode.DELETE.getCode());
         return JsonResult.ok("删除成功");
     }

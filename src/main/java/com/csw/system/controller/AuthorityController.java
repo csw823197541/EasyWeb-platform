@@ -45,9 +45,9 @@ public class AuthorityController {
     }
 
     @ApiOperation(value = "删除权限")
-    @ApiImplicitParam(name = "id", value = "权限id", required = true, dataType = "Integer", paramType = "path")
-    @DeleteMapping("/{id}")
-    public JsonResult delete(@PathVariable("id") Integer id) {
+    @ApiImplicitParam(name = "id", value = "权限id", required = true, dataType = "Integer")
+    @DeleteMapping()
+    public JsonResult delete(Integer id) {
         authorityService.delete(id, StatusCode.DELETE.getCode());
         return JsonResult.ok("删除成功");
     }
