@@ -91,23 +91,23 @@ public class AuthorityController {
         return authorityService.query(keyword);
     }
 
-    @ApiOperation(value = "查询所有权限(分页)")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "第几页", required = true, dataType = "Integer"),
-            @ApiImplicitParam(name = "limit", value = "每页多少条", required = true, dataType = "Integer"),
-            @ApiImplicitParam(name = "keyword", value = "筛选条件关键字", dataType = "String"),
-            @ApiImplicitParam(name = "access_token", value = "令牌", required = true, dataType = "String")
-    })
-    @PostMapping("/queryByPage")
-    public PageResult<Authority> queryByPage(Integer page, Integer limit, String keyword) {
-        if (page == null) {
-            page = 0;
-            limit = 10;
-        } else {
-            page = page - 1;
-        }
-        return authorityService.queryByPage(page, limit, keyword);
-    }
+//    @ApiOperation(value = "查询所有权限(分页)")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "page", value = "第几页", required = true, dataType = "Integer"),
+//            @ApiImplicitParam(name = "limit", value = "每页多少条", required = true, dataType = "Integer"),
+//            @ApiImplicitParam(name = "keyword", value = "筛选条件关键字", dataType = "String"),
+//            @ApiImplicitParam(name = "access_token", value = "令牌", required = true, dataType = "String")
+//    })
+//    @PostMapping("/queryByPage")
+//    public PageResult<Authority> queryByPage(Integer page, Integer limit, String keyword) {
+//        if (page == null) {
+//            page = 0;
+//            limit = 10;
+//        } else {
+//            page = page - 1;
+//        }
+//        return authorityService.queryByPage(page, limit, keyword);
+//    }
 
     @ApiOperation(value = "查询所有菜单权限(上级权限)")
     @GetMapping("/menuAuth")

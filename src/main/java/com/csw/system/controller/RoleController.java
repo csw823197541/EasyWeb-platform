@@ -1,8 +1,10 @@
 package com.csw.system.controller;
 
 import com.csw.common.base.JsonResult;
+import com.csw.common.base.PageQuery;
 import com.csw.common.base.PageResult;
 import com.csw.common.constant.StatusCode;
+import com.csw.common.utils.BeanValidator;
 import com.csw.common.utils.JSONUtil;
 import com.csw.system.entity.Role;
 import com.csw.system.param.RoleParam;
@@ -34,12 +36,16 @@ public class RoleController {
 
     @ApiOperation(value = "查询所有角色（分页）")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "第几页", required = true, dataType = "Integer"),
+            @ApiImplicitParam(name = "limit", value = "每页多少条", required = true, dataType = "Integer"),
             @ApiImplicitParam(name = "keyword", value = "筛选条件关键字", dataType = "String"),
             @ApiImplicitParam(name = "access_token", value = "令牌", required = true, dataType = "String")
     })
-    @GetMapping("/query")
-    public PageResult<Role> query(String keyword) {
-        return roleService.query(StatusCode.NORMAL.getCode(), keyword);
+    @PostMapping("/query")
+    public PageResult<Role> query(Integer page, Integer limit, String keyword) {
+        PageQuery pageQuery = new PageQuery(page, limit);
+        BeanValidator.check(pageQuery);
+        return roleService.query(pageQuery, StatusCode.NORMAL.getCode(), keyword);
     }
 
     @ApiOperation(value = "添加角色")

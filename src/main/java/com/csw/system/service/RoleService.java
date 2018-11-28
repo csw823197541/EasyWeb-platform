@@ -1,6 +1,7 @@
 package com.csw.system.service;
 
 import com.csw.common.base.BaseComponent;
+import com.csw.common.base.PageQuery;
 import com.csw.common.base.PageResult;
 import com.csw.common.constant.RoleTypeCode;
 import com.csw.common.exception.BusinessException;
@@ -18,6 +19,9 @@ import com.csw.system.repository.UserRoleRepository;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -49,20 +53,22 @@ public class RoleService extends BaseComponent {
         return (List<Role>) roleRepository.findAll();
     }
 
-    public PageResult<Role> query(int code, String keyword) {
-        List<Role> roleList;
+    public PageResult<Role> query(PageQuery pageQuery, int code, String keyword) {
         Sort sort = new Sort(Sort.Direction.ASC, "createTime");
+        Pageable pageable = PageRequest.of(pageQuery.getPageNo(), pageQuery.getPageSize(), sort);
+        Page<Role> rolePage;
         if (StringUtil.isNotBlank(keyword)) {
             Specification<Role> specification = (root, criteriaQuery, criteriaBuilder) -> {
                 List<Predicate> predicateList = Lists.newArrayList();
                 predicateList.add(criteriaBuilder.like(root.get("roleName"), "%" + keyword + "%"));
                 return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
             };
-            roleList = roleRepository.findAll(specification, sort);
+            rolePage = roleRepository.findAll(specification, pageable);
         } else {
-            roleList = (List<Role>) roleRepository.findAll(sort);
+            rolePage = roleRepository.findAll(pageable);
         }
-        return new PageResult<>(roleList);
+        List<Role> roleList = rolePage.getContent();
+        return new PageResult<>(rolePage.getTotalElements(), roleList);
     }
 
     @Transactional
