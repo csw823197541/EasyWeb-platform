@@ -93,6 +93,25 @@ public class UserService extends BaseComponent {
         }
     }
 
+    @Transactional
+    public void deleteRole(Integer roleId, String userIds) {
+        if (StringUtil.isNotBlank(userIds)) {
+            Role role = roleRepository.findById(roleId).get();
+            Preconditions.checkNotNull(role, "角色(id:" + roleId + ")不存在");
+            String[] userIdList = StringUtils.split(userIds, ",");
+            List<UserRole> userRoleList = Lists.newArrayList();
+            for (String userId : userIdList) {
+                User user = userRepository.findById(Integer.valueOf(userId)).get();
+                Preconditions.checkNotNull(user, "用户(id:" + userId + ")不存在");
+                UserRole userRole = userRoleRepository.findByUserAndRole(user, role);
+                userRoleList.add(userRole);
+            }
+            userRoleRepository.deleteAll(userRoleList);
+        } else {
+            throw new ParameterException("删除角色绑定的用户时，userIds不可以为空");
+        }
+    }
+
     public void updateState(Integer userId, Integer state) {
 
     }
@@ -132,4 +151,26 @@ public class UserService extends BaseComponent {
         Preconditions.checkNotNull(user, "待更新用户(userId:" + user + ")不存在");
         return user;
     }
+
+    public List<User> queryByRole(Integer roleId, String searchKey, String searchValue) {
+        Role role = roleRepository.findById(roleId).get();
+        Preconditions.checkNotNull(role, "角色(roleId:" + roleId + ")不存在");
+        List<User> userList = Lists.newArrayList();
+        List<UserRole> userRoleList = userRoleRepository.findAllByRole(role);
+        for (UserRole userRole : userRoleList) {
+            if (StringUtil.isNotBlank(searchKey) && StringUtil.isNotBlank(searchValue)) {
+                if ("username".equals(searchKey) && userRole.getUser().getUsername().contains(searchValue)) {
+                    userList.add(userRole.getUser());
+                } else if ("nickName".equals(searchKey) && userRole.getUser().getNickName().contains(searchValue)) {
+                    userList.add(userRole.getUser());
+                } else if ("phone".equals(searchKey) && userRole.getUser().getPhone().contains(searchValue)) {
+                    userList.add(userRole.getUser());
+                }
+            } else {
+                userList.add(userRole.getUser());
+            }
+        }
+        return userList;
+    }
+
 }

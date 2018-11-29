@@ -20,4 +20,6 @@ public interface UserRoleRepository extends PagingAndSortingRepository<UserRole,
     int countByRole(Role role);
 
     List<UserRole> findAllByRole(Role role);
+
+    UserRole findByUserAndRole(User user, Role role);
 }

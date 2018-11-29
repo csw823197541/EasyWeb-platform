@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @Api(value = "用户管理", tags = "user")
 @RestController
@@ -32,7 +34,7 @@ public class UserController extends BaseComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "第几页", required = true, dataType = "Integer"),
             @ApiImplicitParam(name = "limit", value = "每页多少条", required = true, dataType = "Integer"),
-            @ApiImplicitParam(name = "searchKey", value = "筛选条件字段", dataType = "String"),
+            @ApiImplicitParam(name = "searchKey", value = "筛选条件字段(账号、用户名、手机号)", dataType = "String"),
             @ApiImplicitParam(name = "searchValue", value = "筛选条件关键字", dataType = "String"),
             @ApiImplicitParam(name = "access_token", value = "令牌", required = true, dataType = "String")
     })
@@ -95,11 +97,35 @@ public class UserController extends BaseComponent {
     @ApiOperation(value = "分配角色", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "Integer"),
-            @ApiImplicitParam(name = "roleId", value = "角色id(逗号隔开)", required = true, dataType = "String")
+            @ApiImplicitParam(name = "roleIds", value = "角色id(逗号隔开)", required = true, dataType = "String")
     })
     @PutMapping("/assignRole")
-    public JsonResult resetPsw(Integer userId, String roleId) {
-        userService.assignRole(userId, roleId);
+    public JsonResult assignRole(Integer userId, String roleIds) {
+        userService.assignRole(userId, roleIds);
         return JsonResult.ok("分配角色成功");
+    }
+
+    @ApiOperation(value = "查找所有用户(按角色)", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "roleId", value = "角色id", required = true, dataType = "Integer"),
+            @ApiImplicitParam(name = "searchKey", value = "筛选条件字段(账号、用户名、手机号)", dataType = "String"),
+            @ApiImplicitParam(name = "searchValue", value = "筛选条件关键字", dataType = "String"),
+            @ApiImplicitParam(name = "access_token", value = "令牌", required = true, dataType = "String")
+    })
+    @PostMapping("/queryByRole")
+    public PageResult<User> queryByRole(Integer roleId, String searchKey, String searchValue) {
+        List<User> userList = userService.queryByRole(roleId, searchKey, searchValue);
+        return new PageResult<>(userList.size(), userList);
+    }
+
+    @ApiOperation(value = "删除角色用户", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "roleId", value = "角色id", required = true, dataType = "Integer"),
+            @ApiImplicitParam(name = "userIds", value = "用户id(逗号隔开)", required = true, dataType = "String")
+    })
+    @DeleteMapping("/deleteRoleUser")
+    public JsonResult deleteRole(Integer roleId, String userIds) {
+        userService.deleteRole(roleId, userIds);
+        return JsonResult.ok("删除角色用户成功");
     }
 }
