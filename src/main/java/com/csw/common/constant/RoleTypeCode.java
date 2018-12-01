@@ -6,7 +6,7 @@ package com.csw.common.constant;
  */
 public enum RoleTypeCode {
 
-    ADMIN("ADMIN", "管理员"), USER("USER", "普通用户");
+    ADMIN_ROLE("ADMIN_ROLE", "管理员角色"),  DEFAULT_ROLE("DEFAULT_ROLE", "默认角色"), USER_ROLE("USER_ROLE", "普通用户角色");
 
     private String type;
     private String name;

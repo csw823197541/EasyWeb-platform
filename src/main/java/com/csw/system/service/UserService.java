@@ -2,6 +2,7 @@ package com.csw.system.service;
 
 import com.csw.common.base.BaseComponent;
 import com.csw.common.base.PageResult;
+import com.csw.common.constant.RoleTypeCode;
 import com.csw.common.constant.StatusCode;
 import com.csw.common.exception.BusinessException;
 import com.csw.common.exception.ParameterException;
@@ -57,8 +58,14 @@ public class UserService extends BaseComponent {
         user.setPassword(finalSecret);
         user.setState(param.getState() != null ? param.getState() : StatusCode.NORMAL.getCode());
         user.setOperator(getLoginUsername());
+
         user = userRepository.save(user);
-        updateUserRole(user, param.getRoleId());
+
+        // 设置默认角色
+        Role role = roleRepository.findByRoleType(RoleTypeCode.DEFAULT_ROLE.getType());
+        UserRole userRole = UserRole.builder().user(user).role(role).build();
+        userRole.setOperator(getLoginUsername());
+        userRoleRepository.save(userRole);
     }
 
     @Transactional

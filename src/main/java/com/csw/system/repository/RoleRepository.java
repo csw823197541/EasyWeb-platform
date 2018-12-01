@@ -9,4 +9,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * Description:
  */
 public interface RoleRepository extends PagingAndSortingRepository<Role, Integer>, JpaSpecificationExecutor<Role> {
+
+    Role findByRoleType(String type);
 }

@@ -5,6 +5,7 @@ import com.csw.common.base.PageQuery;
 import com.csw.common.base.PageResult;
 import com.csw.common.constant.RoleTypeCode;
 import com.csw.common.exception.BusinessException;
+import com.csw.common.exception.ParameterException;
 import com.csw.common.utils.BeanValidator;
 import com.csw.common.utils.StringUtil;
 import com.csw.system.entity.Authority;
@@ -74,7 +75,7 @@ public class RoleService extends BaseComponent {
     @Transactional
     public void create(RoleParam param) {
         BeanValidator.check(param);
-        Role role = Role.builder().roleName(param.getRoleName()).comments(param.getComments()).roleType(RoleTypeCode.USER.getType()).build();
+        Role role = Role.builder().roleName(param.getRoleName()).comments(param.getComments()).roleType(RoleTypeCode.USER_ROLE.getType()).build();
         role.setOperator(getLoginUsername());
         roleRepository.save(role);
     }
@@ -94,6 +95,11 @@ public class RoleService extends BaseComponent {
     public void delete(Integer id, int code) {
         Role role = roleRepository.findById(id).get();
         Preconditions.checkNotNull(role, "角色(id:" + id + ")不存在");
+        if (RoleTypeCode.ADMIN_ROLE.getType().equals(role.getRoleType())) {
+            throw new ParameterException("对不起，管理员角色不能删除");
+        } else if (RoleTypeCode.DEFAULT_ROLE.getType().equals(role.getRoleType())) {
+            throw new ParameterException("对不起，默认角色不能删除");
+        }
         List<UserRole> userRoleList = userRoleRepository.findAllByRole(role);
         if (userRoleList.size() > 0) {
             StringBuilder str = new StringBuilder();
@@ -156,7 +162,7 @@ public class RoleService extends BaseComponent {
 
     private String getAuthorityName(Authority authority) {
         for (Role role : getLoginUser().getRoles()) {
-            if (RoleTypeCode.ADMIN.getType().equals(role.getRoleType())) {
+            if (RoleTypeCode.ADMIN_ROLE.getType().equals(role.getRoleType())) {
                 if (StringUtil.isNotBlank(authority.getAuthorityUrl())) {
                     return authority.getAuthorityName() + "(" + StringUtil.getStr(authority.getAuthorityUrl()) + ")";
                 } else {

@@ -102,8 +102,8 @@ CREATE TABLE `sys_role` (
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES ('1', '系统功能', 'ADMIN', '系统菜单功能', '', '2018-09-12 22:39:44', '2018-09-12 22:39:44');
-INSERT INTO `sys_role` VALUES ('2', '角色管理', 'USER', 'test', 'admin', '2018-09-13 16:58:45', '2018-09-13 16:58:45');
+INSERT INTO `sys_role` VALUES ('1', '系统功能', 'ADMIN_ROLE', '系统菜单功能', '', '2018-09-12 22:39:44', '2018-09-12 22:39:44');
+INSERT INTO `sys_role` VALUES ('2', '角色管理', 'USER_ROLE', 'test', 'admin', '2018-09-13 16:58:45', '2018-09-13 16:58:45');
 
 -- ----------------------------
 -- Table structure for sys_role_authority
@@ -173,7 +173,6 @@ CREATE TABLE `sys_user` (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES ('1', 'demo', '{bcrypt}$2a$10$kKqZaoluuMjfvusTuB5Z6e/RPhQgCXtkmBdhGokWPIi0RdhoWxD42', 'demo', null, '男', '13625436602', null, null, '0', null, '2018-09-12 21:36:40', '2018-09-15 17:44:26');
 INSERT INTO `sys_user` VALUES ('2', 'admin', '{bcrypt}$2a$10$qrL6p6FKEitfGQnVRa.PPO.PsOJ4Dj9BSjEXll6fnruqBXABb/51O', '管理员', '', '女', '13125062807', 'whvcse@foxmail.com', null, '0', null, '2018-09-12 21:36:40', '2018-09-15 17:44:37');
 INSERT INTO `sys_user` VALUES ('3', 'test', '{bcrypt}$2a$10$xTcIkgceIrIA3MX2U.GBFuTteabtl0OziMCrmuHr2NrbjA2MVTfs2', 'test', null, '女', '18217090001', null, null, '0', 'admin', '2018-09-15 22:16:18', '2018-09-15 22:16:18');
 
