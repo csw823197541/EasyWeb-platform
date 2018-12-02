@@ -34,11 +34,6 @@ import java.util.Map;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private MyFilterSecurityInterceptor myFilterSecurityInterceptor;
-
-    @Autowired
-    private MyLogoutHandler myLogoutHandler;
 
     @Bean
     @Override
@@ -69,10 +64,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         //对oauth开头的请求不拦截
         http.authorizeRequests().antMatchers("/oauth/*").permitAll();
-
-        http.logout().logoutSuccessHandler(myLogoutHandler);
-
-//        http.addFilterBefore(myFilterSecurityInterceptor, FilterSecurityInterceptor.class);
 
     }
 }

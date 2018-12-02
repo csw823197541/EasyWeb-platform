@@ -1,14 +1,17 @@
 package com.csw.common.oauth;
 
+import com.csw.system.service.UserDetailsServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -56,6 +59,12 @@ public class OAuth2ServerConfig {
         @Autowired
         private MyFilterSecurityInterceptor myFilterSecurityInterceptor;
 
+        @Autowired
+        private MyLogoutSuccessHandler myLogoutSuccessHandler;
+
+        @Autowired
+        private MyLogoutHandler myLogoutHandler;
+
         @Override
         public void configure(ResourceServerSecurityConfigurer resources) {
             resources.resourceId(RESOURCE_ID).stateless(true);
@@ -71,6 +80,8 @@ public class OAuth2ServerConfig {
             http.authorizeRequests().antMatchers("/sys/**").authenticated();
 
             http.addFilterBefore(myFilterSecurityInterceptor, FilterSecurityInterceptor.class);
+
+            http.logout().clearAuthentication(true).logoutSuccessHandler(myLogoutSuccessHandler).addLogoutHandler(myLogoutHandler);
         }
     }
 
@@ -80,8 +91,14 @@ public class OAuth2ServerConfig {
     @Configuration
     @EnableAuthorizationServer
     protected static class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
+
         @Autowired
         private AuthenticationManager authenticationManager;
+
+        @Bean
+        protected UserDetailsService userDetailsService() {
+            return new UserDetailsServiceImpl();
+        }
 
         @Override
         public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -112,7 +129,8 @@ public class OAuth2ServerConfig {
 //            endpoints.tokenStore(new RedisTokenStore(redisConnectionFactory))
             endpoints.tokenStore(new InMemoryTokenStore())
                     .authenticationManager(authenticationManager)
-                    .allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
+                    .allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST)
+            .userDetailsService(userDetailsService());
         }
 
         @Override

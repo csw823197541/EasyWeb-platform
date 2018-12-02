@@ -77,7 +77,6 @@ public class UserService extends BaseComponent {
         user.setPhone(param.getPhone());
         user.setOperator(getLoginUsername());
         userRepository.save(user);
-        updateUserRole(user, param.getRoleId());
     }
 
     @Transactional

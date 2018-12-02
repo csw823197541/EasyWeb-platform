@@ -1,46 +1,56 @@
 package com.csw.common.oauth;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * Created by csw on 2018/11/26.
+ * Created by csw on 2018/12/2.
  * Description:
  */
+@Slf4j
 @Component
-public class MyLogoutHandler implements LogoutSuccessHandler {
+public class MyLogoutHandler implements LogoutHandler {
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private AuthorizationServerEndpointsConfiguration endpoints;
 
     @Override
-    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("code", "200");
-        map.put("msg", "成功退出登录");
-        String str = "";
-        try {
-            str = objectMapper.writeValueAsString(map);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        TokenStore tokenStore = endpoints.getEndpointsConfigurer().getTokenStore();
+        Assert.notNull(tokenStore, "tokenStore must be set");
+        String token = request.getHeader("Authorization");
+        Assert.hasText(token, "token must be set");
+        if (isJwtBearerToken(token)) {
+            token = token.substring(6).trim();
+            OAuth2AccessToken existingAccessToken = tokenStore.readAccessToken(token);
+            OAuth2RefreshToken refreshToken;
+            if (existingAccessToken != null) {
+                if (existingAccessToken.getRefreshToken() != null) {
+                    log.info("remove refreshToken!", existingAccessToken.getRefreshToken());
+                    refreshToken = existingAccessToken.getRefreshToken();
+                    tokenStore.removeRefreshToken(refreshToken);
+                }
+                log.info("remove existingAccessToken!", existingAccessToken);
+                tokenStore.removeAccessToken(existingAccessToken);
+            }
+        } else {
+            throw new BadClientCredentialsException();
         }
-        response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-        try {
-            response.getWriter().write(str);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    }
+
+    private boolean isJwtBearerToken(String token) {
+        return (token.startsWith("Bearer") || token.startsWith("bearer"));
     }
 }
